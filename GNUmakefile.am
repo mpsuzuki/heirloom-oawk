@@ -1,0 +1,65 @@
+EXTRA_DIST = autogen.sh oawk.1 EXPLAIN NOTES Makefile.mk 
+
+bin_PROGRAMS = oawk
+noinst_PROGRAMS = proc
+proc_SOURCES = proc.c
+
+libuxre_prefix    = @libuxre_prefix@
+libuxre_include   = @libuxre_include@
+libuxre_lib       = @libuxre_lib@
+
+libcommon_prefix  = @libcommon_prefix@
+libcommon_include = @libcommon_include@
+libcommon_lib     = @libcommon_lib@
+
+oawk_CPPFLAGS  = -I$(libuxre_include) -DUXRE -I$(libcommon_include)
+oawk_LDFLAGS = -L$(libuxre_lib) -L$(libcommon_lib)
+oawk_LDADD   = -lm -luxre -lcommon 
+
+oawk_SOURCES = \
+	b.c lib.c main.c parse.c run.c tran.c version.c
+
+b.c: awk.h
+lib.c: awk.h
+main.c: awk.h
+parse.c: awk.h
+proc.c: awk.h
+run.c: awk.h
+tran.c: awk.h
+
+EXTRA_DIST += awk.g.y awk.lx.l awk.def freeze.c
+nodist_oawk_SOURCES = awk.h awk.g.c awk.g.h awk.lx.c awk.h token.c proctab.c
+MOSTLYCLEANFILES = $(nodist_oawk_SOURCES) y.tab.c y.tab.h
+awk.g.c: awk.g.y
+	$(YACC) -d $(YFLAGS) $^
+	mv y.tab.c ${^:.y=.c}
+	mv y.tab.h ${^:.y=.h}
+
+awk.g.h: awk.g.y
+	$(YACC) -d $(YFLAGS) $^
+	mv y.tab.c ${^:.y=.c}
+	mv y.tab.h ${^:.y=.h}
+
+awk.h: awk.g.h
+	grep '^#[	]*define[	]*[^Yy][^Yy]' < $^ > $@
+
+awk.lx.c: awk.lx.l
+	$(LEX) -t $^ > $@
+
+token.c: awk.h
+	echo >  $@ '#include "awk.h"' 
+	echo >> $@ 'struct toke' 
+	echo >> $@ '{ char *tnm;' 
+	echo >> $@ '  int yval;' 
+	echo >> $@ '} tok[] = {' 
+	sed  >> $@ < $^ -e 's/#[	]*define[	]\{1,\}\([^	]*\)[	]\{1,\}\(.*\)/{ "\1", \2 },/'
+	echo >> $@ '};'
+	echo >> $@ 'char *tokname(int n)'
+	echo >> $@ '{'
+	echo >> $@ '  if (n < FIRSTTOKEN || n >= LASTTOKEN)'
+	echo >> $@ '    n = FIRSTTOKEN;'
+	echo >> $@ '  return(tok[n - FIRSTTOKEN].tnm);'
+	echo >> $@ '}'
+
+proctab.c: proc
+	./proc > $@
