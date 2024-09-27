@@ -41,7 +41,7 @@ awk.g.h: awk.g.y
 	mv y.tab.h ${^:.y=.h}
 
 awk.h: awk.g.h
-	grep '^#[	]*define[	]*[^Yy][^Yy]' < $^ > $@
+	$(AWK) '/^#[ \t]*define[ \t]*[^Yy][^Yy]/{print}' < $^ > $@
 
 awk.lx.c: awk.lx.l
 	$(LEX) -t $^ > $@
