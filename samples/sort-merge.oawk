@@ -1,0 +1,101 @@
+BEGIN {
+  asciig0 = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+}
+{
+  words[NR] = $0;
+}
+END {
+  for (i = 1; i <= NR; i++)
+    arr[i] = sprintf("%d", i);
+
+  while (0 < length(arr[2])) {
+
+    for (i = 0; 0 < length(arr[(2 * i) + 1]) || 0 < length(arr[(2 * i) + 2]); i ++) {
+      printf("i=%d\n", i);
+      for (j = 1; j < NR; j++)
+        printf("    #%d:%s\n", j, arr[j]);
+      nidxa = split(arr[(2 * i) + 1], idxa, ",");  
+      nidxb = split(arr[(2 * i) + 2], idxb, ",");  
+
+      ia = 1;
+      ib = 1;
+      mgd = "";
+      while (ia <= nidxa && ib <= nidxb) {
+        wa = words[idxa[ia]];
+        wb = words[idxb[ib]];
+        printf("  compare #%d:\"%s\" vs #%d:\"%s\"\n", ia, wa, ib, wb);
+        lena = length(wa);
+        lenb = length(wb);
+
+        if (lena < lenb)
+          cmp = -1;
+        else if (lenb < lena)
+          cmp = 1;
+        else
+          cmp = 0;
+
+        for (ci = 1; ci <= lena && ci <= lenb; ci++) {
+          ca = substr(wa, ci, 1);
+          cb = substr(wb, ci, 1);
+          cai = index(asciig0, ca);
+          cbi = index(asciig0, cb);
+          if (cai == cbi)
+            continue;
+
+          if (cai < cbi)
+            cmp = -1;
+          else if (cbi < cai)
+            cmp = 1;
+
+          break;
+        }
+
+        if (cmp == -1) {
+          printf("    append \"%s\"\n", wa);
+          mgd = mgd sprintf(",%d", idxa[ia]);
+          ia ++;
+        } else if (cmp == 1) {
+          printf("    append \"%s\"\n", wb);
+          mgd = mgd sprintf(",%d", idxb[ib]);
+          ib ++;
+        } else {
+          printf("    append \"%s\" then \"%s\"\n", wa, wb);
+          mgd = mgd sprintf(",%d,%d", idxa[ia], idxb[ib]);
+          ia ++;
+          ib ++;
+        }
+      }
+
+      printf("  no more to compare\n");
+      for (;ia <= nidxa;ia++) {
+        if (0 == length(words[idxa[ia]]))
+          continue;
+        printf("    append rest \"%s\"\n", words[idxa[ia]]);
+        mgd = mgd sprintf(",%d", idxa[ia]);
+      }
+
+      for (;ib <= nidxb;ib++) {
+        if (0 == length(words[idxb[ib]]))
+          continue;
+        printf("    append rest \"%s\"\n", words[idxb[ib]]);
+        mgd = mgd sprintf(",%d", idxb[ib]);
+      }
+
+
+      mgd = substr(mgd, 2);
+      printf(" #%d:%s + #%d:%s -> #%d:%s\n", (2*i)+1, arr[(2*i)+1], (2*i)+2, arr[(2*i)+2], i+1, mgd);
+      arr[(2 * i) + 1] = "";
+      arr[(2 * i) + 2] = "";
+      arr[i + 1] = mgd;
+
+      #for (j = 1; j <= NR; j++)
+      #  printf("    #%d:%s\n", j, arr[j]);
+    }
+  }
+
+  split(arr[1], idxa, ",");
+  for (i = 1; i <= NR; i++) {
+    # printf("#%d:%d:%s\n", i, idxa[i], words[idxa[i]]);
+    printf("%s\n", words[idxa[i]]);
+  }
+}
