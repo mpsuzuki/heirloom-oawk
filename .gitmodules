@@ -1,0 +1,6 @@
+[submodule "heirloom-libcommon"]
+	path = heirloom-libcommon
+	url = https://github.com/mpsuzuki/heirloom-libcommon
+[submodule "heirloom-libuxre"]
+	path = heirloom-libuxre
+	url = https://github.com/mpsuzuki/heirloom-libuxre
