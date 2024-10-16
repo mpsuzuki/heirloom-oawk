@@ -38,7 +38,7 @@ then
 elif test -r ${libuxre_prefix}/lib/libuxre.a
 then
   AC_MSG_RESULT([${libuxre_prefix}/lib/libuxre.a])
-  libuxre_include='$(libuxre_prefix)/lib'
+  libuxre_lib='$(libuxre_prefix)/lib'
 else
   AC_MSG_ERROR([not found])
 fi
@@ -74,7 +74,7 @@ then
 elif test -r ${libcommon_prefix}/lib/libcommon.a
 then
   AC_MSG_RESULT([${libcommon_prefix}/lib/libcommon.a])
-  libcommon_include='$(libcommon_prefix)/lib'
+  libcommon_lib='$(libcommon_prefix)/lib'
 else
   AC_MSG_ERROR([not found])
 fi
