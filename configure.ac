@@ -10,7 +10,12 @@ AC_PROG_CC
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 
+# Pack included heirloom-libXXX in make dist, subdirectories must be configured always.
+AC_CONFIG_SUBDIRS([heirloom-libcommon])
+AC_CONFIG_SUBDIRS([heirloom-libuxre])
+
 # Search libuxre
+use_included_libuxre=no
 AC_ARG_WITH([libuxre],
 AS_HELP_STRING([--with-libuxre=prefix-to-builddir-libuxre],
   [path to the builddir of libuxre]),
@@ -27,11 +32,18 @@ then
   AC_MSG_RESULT([${libuxre_prefix}/include/regex.h])
   libuxre_include='$(libuxre_prefix)/include'
 else
-  AC_MSG_ERROR([not found])
+  AC_MSG_WARN([use included copy of heirloom-libuxre])
+  use_included_libuxre=yes
+  libuxre_prefix="${srcdir}"/heirloom-libuxre/
+  libuxre_include='$(libuxre_prefix)'
 fi
 
 AC_MSG_CHECKING([libuxre.a])
-if test -r ${libuxre_prefix}/libuxre.a
+if test "${use_included_libuxre}" = yes
+then
+  AC_MSG_RESULT([build from included source])
+  libuxre_lib='$(libuxre_prefix)'
+elif test -r ${libuxre_prefix}/libuxre.a
 then
   AC_MSG_RESULT([${libuxre_prefix}/libuxre.a])
   libuxre_lib='$(libuxre_prefix)'
@@ -42,11 +54,13 @@ then
 else
   AC_MSG_ERROR([not found])
 fi
+AM_CONDITIONAL(BUILD_LIBUXRE, test "${use_included_libuxre}" = yes)
 AC_SUBST([libuxre_prefix])
 AC_SUBST([libuxre_include])
 AC_SUBST([libuxre_lib])
 
 # Search libcommon
+use_included_libcommon=no
 AC_ARG_WITH([libcommon],
 AS_HELP_STRING([--with-libcommon=prefix-to-builddir-libcommon],
   [path to the builddir of libcommon]),
@@ -63,11 +77,18 @@ then
   AC_MSG_RESULT([${libcommon_prefix}/include/regexp.h])
   libcommon_include='$(libcommon_prefix)/include'
 else
-  AC_MSG_ERROR([not found])
+  AC_MSG_WARN([use included copy of heirloom-libcommon])
+  use_included_libcommon=yes
+  libcommon_prefix="${srcdir}"/heirloom-libcommon/
+  libcommon_include='$(libcommon_prefix)'
 fi
 
 AC_MSG_CHECKING([libcommon.a])
-if test -r ${libcommon_prefix}/libcommon.a
+if test "${use_included_libcommon}" = "yes"
+then
+  AC_MSG_RESULT([build from included source])
+  libcommon_lib='$(libcommon_prefix)'
+elif test -r ${libcommon_prefix}/libcommon.a
 then
   AC_MSG_RESULT([${libcommon_prefix}/libcommon.a])
   libcommon_lib='$(libcommon_prefix)'
@@ -78,14 +99,10 @@ then
 else
   AC_MSG_ERROR([not found])
 fi
+AM_CONDITIONAL(BUILD_LIBCOMMON, test "${use_included_libcommon}" = yes)
 AC_SUBST([libcommon_prefix])
 AC_SUBST([libcommon_include])
 AC_SUBST([libcommon_lib])
-
-
-
-
-
 
 
 AC_CONFIG_HEADERS([config.h])

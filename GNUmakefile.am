@@ -4,13 +4,24 @@ bin_PROGRAMS = oawk
 noinst_PROGRAMS = proc
 proc_SOURCES = proc.c
 
+included_libuxre = heirloom-libuxre
+if BUILD_LIBUXRE
+  OPT_LIBUXRE = $(included_libuxre)
+endif
 libuxre_prefix    = @libuxre_prefix@
 libuxre_include   = @libuxre_include@
 libuxre_lib       = @libuxre_lib@
 
+included_libcommon = heirloom-libcommon
+if BUILD_LIBCOMMON
+  OPT_LIBCOMMON = $(included_libcommon)
+endif
 libcommon_prefix  = @libcommon_prefix@
 libcommon_include = @libcommon_include@
 libcommon_lib     = @libcommon_lib@
+
+SUBDIRS = $(OPT_LIBUXRE) $(OPT_LIBCOMMON)
+DIST_SUBDIRS = $(included_libuxre) $(included_libcommon)
 
 oawk_CPPFLAGS  = -I$(libuxre_include) -DUXRE -I$(libcommon_include)
 oawk_LDFLAGS = -L$(libuxre_lib) -L$(libcommon_lib)
