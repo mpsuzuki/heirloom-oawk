@@ -22,38 +22,50 @@ AS_HELP_STRING([--with-libuxre=prefix-to-builddir-libuxre],
   [libuxre_prefix=${withval}],
   [libuxre_prefix=../heirloom-libuxre])
 
+AC_MSG_CHECKING([libuxre.a])
+if test -r "${libuxre_prefix}/libuxre.a"
+then
+  AC_MSG_RESULT([${libuxre_prefix}/libuxre.a])
+  libuxre_lib="${libuxre_prefix}"
+elif test -r ${libuxre_prefix}/lib/libuxre.a
+then
+  AC_MSG_RESULT([${libuxre_prefix}/lib/libuxre.a])
+  libuxre_lib="${libuxre_prefix}/lib"
+fi
+
+if test x"${libuxre_lib}" != x
+then
+  orig_LIBS="${LIBS}"
+  LIBS="-L${libuxre_lib} -luxre"
+  AC_CHECK_FUNC([libuxre_regdelnfa],[],[libuxre_lib=""])
+  LIBS="${orig_LIBS}"
+fi
+
+if test x"${libuxre_lib}" = x
+then
+  AC_MSG_WARN([no usable libuxre found, use included copy of heirloom-libuxre])
+  use_included_libuxre=yes
+  libuxre_prefix="${srcdir}"/heirloom-libuxre/
+  libuxre_include='$(libuxre_prefix)'
+  libuxre_lib='$(libuxre_prefix)'
+fi
+
 AC_MSG_CHECKING([regex.h])
-if test -r ${libuxre_prefix}/regex.h
+if test "${use_included_libuxre}" = yes
+then
+  AC_MSG_RESULT([build from included source])
+elif test -r "${libuxre_prefix}"/regex.h
 then
   AC_MSG_RESULT([${libuxre_prefix}/regex.h])
-  libuxre_include='$(libuxre_prefix)'
+  libuxre_include="${libuxre_prefix}"
 elif test -r ${libuxre_prefix}/include/regex.h
 then
   AC_MSG_RESULT([${libuxre_prefix}/include/regex.h])
   libuxre_include='$(libuxre_prefix)/include'
 else
-  AC_MSG_WARN([use included copy of heirloom-libuxre])
-  use_included_libuxre=yes
-  libuxre_prefix="${srcdir}"/heirloom-libuxre/
-  libuxre_include='$(libuxre_prefix)'
-fi
-
-AC_MSG_CHECKING([libuxre.a])
-if test "${use_included_libuxre}" = yes
-then
-  AC_MSG_RESULT([build from included source])
-  libuxre_lib='$(libuxre_prefix)'
-elif test -r ${libuxre_prefix}/libuxre.a
-then
-  AC_MSG_RESULT([${libuxre_prefix}/libuxre.a])
-  libuxre_lib='$(libuxre_prefix)'
-elif test -r ${libuxre_prefix}/lib/libuxre.a
-then
-  AC_MSG_RESULT([${libuxre_prefix}/lib/libuxre.a])
-  libuxre_lib='$(libuxre_prefix)/lib'
-else
   AC_MSG_ERROR([not found])
 fi
+
 AM_CONDITIONAL(BUILD_LIBUXRE, test "${use_included_libuxre}" = yes)
 AC_SUBST([libuxre_prefix])
 AC_SUBST([libuxre_include])
@@ -67,8 +79,46 @@ AS_HELP_STRING([--with-libcommon=prefix-to-builddir-libcommon],
   [libcommon_prefix=${withval}],
   [libcommon_prefix=../heirloom-libcommon])
 
+AC_MSG_CHECKING([libcommon.a])
+if test "${use_included_libcommon}" = yes
+then
+  AC_MSG_RESULT([build from included source])
+  libcommon_lib="${libcommon_prefix}"
+elif test -r "${libcommon_prefix}"/libcommon.a
+then
+  AC_MSG_RESULT([${libcommon_prefix}/libcommon.a])
+  libcommon_lib="${libcommon_prefix}"
+elif test -r "${libcommon_prefix}"/lib/libcommon.a
+then
+  AC_MSG_RESULT([${libcommon_prefix}/lib/libcommon.a])
+  libcommon_lib="${libcommon_prefix}"/lib
+fi
+
+if test x"${libcommon_lib}" != x
+then
+  orig_LIBS="${LIBS}"
+  LIBS="-L${libcommon_lib} -lcommon"
+  AC_CHECK_FUNC([ib_alloc],[],[libcommon_lib=""])
+  LIBS="${orig_LIBS}"
+fi
+
+if test x"${libcommon_lib}" = x
+then
+  AC_MSG_RESULT([not found, use included copy of heirloom-libcommon])
+  use_included_libcommon=yes
+  libcommon_prefix="${srcdir}"/heirloom-libcommon/
+  libcommon_include='$(libcommon_prefix)'
+  libcommon_lib='$(libcommon_prefix)'
+fi
+
+
+
+
 AC_MSG_CHECKING([regexp.h])
-if test -r ${libcommon_prefix}/regexp.h
+if test "${use_included_libcommon}" = yes
+then
+  AC_MSG_RESULT([build from included source])
+elif test -r ${libcommon_prefix}/regexp.h
 then
   AC_MSG_RESULT([${libcommon_prefix}/regexp.h])
   libcommon_include='$(libcommon_prefix)'
@@ -77,28 +127,9 @@ then
   AC_MSG_RESULT([${libcommon_prefix}/include/regexp.h])
   libcommon_include='$(libcommon_prefix)/include'
 else
-  AC_MSG_WARN([use included copy of heirloom-libcommon])
-  use_included_libcommon=yes
-  libcommon_prefix="${srcdir}"/heirloom-libcommon/
-  libcommon_include='$(libcommon_prefix)'
-fi
-
-AC_MSG_CHECKING([libcommon.a])
-if test "${use_included_libcommon}" = "yes"
-then
-  AC_MSG_RESULT([build from included source])
-  libcommon_lib='$(libcommon_prefix)'
-elif test -r ${libcommon_prefix}/libcommon.a
-then
-  AC_MSG_RESULT([${libcommon_prefix}/libcommon.a])
-  libcommon_lib='$(libcommon_prefix)'
-elif test -r ${libcommon_prefix}/lib/libcommon.a
-then
-  AC_MSG_RESULT([${libcommon_prefix}/lib/libcommon.a])
-  libcommon_lib='$(libcommon_prefix)/lib'
-else
   AC_MSG_ERROR([not found])
 fi
+
 AM_CONDITIONAL(BUILD_LIBCOMMON, test "${use_included_libcommon}" = yes)
 AC_SUBST([libcommon_prefix])
 AC_SUBST([libcommon_include])
